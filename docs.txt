@@ -1,0 +1,13 @@
+installing express
+installing nodemon
+installing dotenv
+installing appwrite
+installing cors, googleapis, jsonwebtoken, mongo
+installing mongodb
+
+-- why the fuck do i need to configure the dotenv in each 
+file accessing env variables
+
+
+
+-we'll need to write the auth.middleware.js for verifying user identity

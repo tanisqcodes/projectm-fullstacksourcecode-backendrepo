@@ -1,0 +1,25 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "project m backend",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon  -r dotenv/config --experimental-json-modules src/index.js"
+  },
+  "author": "tanishq nagar",
+  "license": "ISC",
+  "dependencies": {
+    "appwrite": "^20.1.0",
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "googleapis": "^161.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongo": "^0.1.0",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.19.0",
+    "nodemon": "^3.1.10"
+  }
+}
