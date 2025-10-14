@@ -26,15 +26,16 @@ const tablesDB  = new TablesDB(client)
 
 
 export const getQuestion = asyncHandler(async(req , res) =>  {
+    console.log("getQuestionMethodRan")
      const chapterNumber = req.query.chapterNumber
      const questionNumber = req.query.questionNumber
-    console.log(appwriteDatabaseId)
+   // console.log(appwriteDatabaseId)
      const questionObject = await tablesDB.listRows({
         databaseId: appwriteDatabaseId, 
         tableId : satMathKaplanCollectionId,
         queries: [
             Query.equal('questionNumber', questionNumber) , 
-            Query.equal('subtopic', chapterNumber)
+            Query.equal('subtopic',`chapter ${chapterNumber}`)
 
         ] 
             
@@ -42,6 +43,7 @@ export const getQuestion = asyncHandler(async(req , res) =>  {
      if(!questionObject){
         throw new apiError(400, "question was not successfully fetched from appwrite database")
      }
+     // console.log(questionObject)
      return res.status(200).json( new apiResponse(200,        
          questionObject
          , "question delivered by backend successfully"

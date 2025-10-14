@@ -3,7 +3,8 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import axios from "axios"
 import { UserModel } from "../models/userModel.js"
 import { oauth2client } from "../utils/googleConfig.js"
-import jwt from "jsonwebtoken"
+import pkg from "jsonwebtoken"
+const {sign , verify} = pkg; 
 /* export const authMethod = asyncHandler( async(req, res) => { 
      const number = req.query.number
 return res.status(200).json( new apiResponse(200 , { 
@@ -32,17 +33,17 @@ if( !user){
     })
 }
 const {_id} = user // extracting id from user object 
-const token =  jwt.sign( { 
+const token =  sign( { 
     _id , email
 },   
-process.env.JWT_SECRET || '74649946afb640c67573e5d8ad2ba274',
+process.env.JWT_SECRET ,  // removed the || KEY  , due to security issues , env file key shall be the primary key
 { 
     expiresIn: process.env.JWT_TIMEOUT || '7d'
 })
  return res.status(200).json(
     {
         message: "success", 
-        token, 
+        token,
         user
     }
  )
@@ -55,3 +56,43 @@ export const authtest = asyncHandler(
         return res.send("yes route is working and so is /user/auth/test")
     }
 )
+
+// jwtVerifyMain is method for verifying the received jwt 
+export const jwtVerifyMain = asyncHandler( async(req, res) => {
+    console.log("method ran for /user/auth/landingPageJWTVerifier")
+    const token = req.query.token
+    if(!token){
+        return res.status(401).json( 
+            { 
+                message: "jwt token is missing"
+
+            }
+        )
+    }
+    try {
+        const decodedToken = verify(token , process.env.JWT_SECRET)
+        if(!decodedToken) return res.status(403).json({ 
+            message: "invalid or expired Token"
+        })
+        return(
+            res.status(200).json( 
+                { 
+                    message: "jwt token is verified", 
+                    decodedToken
+                }
+            )
+        )
+    }catch (err) {
+        return res.status(403).json({ 
+            message: err
+        })
+    }
+        
+        
+         
+        
+
+
+
+})
+ 
