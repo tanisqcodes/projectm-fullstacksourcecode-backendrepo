@@ -54,7 +54,7 @@ export const getQuestion = asyncHandler(async(req , res) =>  {
 })
 
 export const mathsQuestionSubmissionMethod = asyncHandler(async(req, res) => { 
-    const { questionId, isCorrect, questionNumber , responseType, topic, section, exam , level , calculatorUse, subtopic , retryCount, isHintViewed, isAnswerViewed, source, timeTaken } = req.query
+    const { questionId, isCorrect, questionNumber , responseType, topic, section, exam , level , calculatorUse, subtopic , retryCount, isHintViewed, isAnswerViewed, source, timeTakenSeconds, timeTakenMinutes } = req.query
    const userId  = req.user._id // this _id is from _id from socials-login database in mongoDB
   //  console.log("userId: " ,userId) 
   //  console.log("req.user._id :", userId)
@@ -81,12 +81,34 @@ export const mathsQuestionSubmissionMethod = asyncHandler(async(req, res) => {
         isHintViewed, 
         isAnswerViewed, 
         source, 
-        timeTaken
+        timeTakenMinutes, 
+        timeTakenSeconds
       })
 
     return res.status(200).json(
          new apiResponse(200, `${userId} submitted in mathsQuestionSubmissionModel with unique submission Id ${response._id}`, "maths questionSubmission done successfully")
       )
+
+
+
+})
+
+
+
+export const getSolvedMathsQuestionsMethod = asyncHandler(async(req, res) => { 
+  const { _id } = req.user // this _id is unique userId from socials-login from mongoDB
+  const {chapterNumber } = req.query
+  const solvedQuestionNumbers = await MathsQuestionSubmissionModel.distinct('questionNumber', {
+    userId: _id,
+    subtopic: `chapter ${chapterNumber}`,
+    isCorrect: true
+  });
+  return res.status(200).json(
+    new apiResponse(200, 
+      solvedQuestionNumbers, 
+      `this is list of questionNumbers solved by userId: ${_id}`
+    )
+  )
 
 
 

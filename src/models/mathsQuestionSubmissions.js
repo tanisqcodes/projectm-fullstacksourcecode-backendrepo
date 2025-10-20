@@ -53,9 +53,12 @@ const MathsQuestionSubmissionSchema = new mongoose.Schema( {
     Source: {  // advanced attribute , like test , practice or what
         type: String
     }, 
-    timeTaken: { 
+    timeTakenMinutes: {  // this will represent the minute part of time taken
         type: String
     }, 
+    timeTakenSeconds: { // this will represent the seconds part of minutes
+        type: String
+    }
     /* submittedAt: { 
         type: String
     }, 
