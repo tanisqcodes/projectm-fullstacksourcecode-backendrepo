@@ -8,6 +8,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import dotenv from "dotenv"
+import { MathsQuestionSubmissionModel } from "../models/mathsQuestionSubmissions.js";
 
 dotenv.config({
     path: '.../.env'
@@ -48,6 +49,45 @@ export const getQuestion = asyncHandler(async(req , res) =>  {
          questionObject
          , "question delivered by backend successfully"
      ))
+
+
+})
+
+export const mathsQuestionSubmissionMethod = asyncHandler(async(req, res) => { 
+    const { questionId, isCorrect, questionNumber , responseType, topic, section, exam , level , calculatorUse, subtopic , retryCount, isHintViewed, isAnswerViewed, source, timeTaken } = req.query
+   const userId  = req.user._id // this _id is from _id from socials-login database in mongoDB
+  //  console.log("userId: " ,userId) 
+  //  console.log("req.user._id :", userId)
+    
+    
+    // post requests have req.body not req.query
+  //  if(!questionId || !userId || !isConnect || !questionNumber || !responseType){ 
+    //    throw new apiError( 400, "missing Required Parameter: one of required parameter was not receieved by the express server")
+  //  }
+  
+    const response = await MathsQuestionSubmissionModel.create({ 
+        questionId, 
+        userId, 
+        isCorrect ,
+        questionNumber, 
+        responseType, 
+        topic, 
+        section , 
+        exam , 
+        level , 
+        calculatorUse, 
+        subtopic, 
+        retryCount , 
+        isHintViewed, 
+        isAnswerViewed, 
+        source, 
+        timeTaken
+      })
+
+    return res.status(200).json(
+         new apiResponse(200, `${userId} submitted in mathsQuestionSubmissionModel with unique submission Id ${response._id}`, "maths questionSubmission done successfully")
+      )
+
 
 
 })

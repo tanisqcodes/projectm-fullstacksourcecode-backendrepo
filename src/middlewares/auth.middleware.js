@@ -16,6 +16,7 @@ export const verifyJWT = asyncHandler(
             if(!decodedToken) return res.status(403).json({ 
                 message: "invalid or expired Token"
             })
+            req.user = decodedToken
             // you can add decoded token in req, if you want later
             next();
         

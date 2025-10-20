@@ -6,7 +6,7 @@ import { mongoDBconnect } from "./models/dbConnections.js"
 mongoDBconnect()
 // console.log(process.env.PORT)
 try{
-    app.listen(process.env.PORT || 8000, () => { 
+    app.listen(process.env.PORT || 8000, () => {
     
         console.log(`sever is running at port:${process.env.PORT}`)
     })

@@ -28,7 +28,7 @@ return res.status(200).json( new apiResponse(200 , {
 const {email, name } = userRes.data
 let user = await UserModel.findOne({email})
 if( !user){ 
-    user = await UserModel.create({ 
+    user = await UserModel.create({
         name, email
     })
 }

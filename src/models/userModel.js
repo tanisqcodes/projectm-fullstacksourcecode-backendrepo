@@ -1,8 +1,8 @@
 import mongoose from "mongoose"
-const UserSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema( 
     { 
         name : { 
-            typeof: String
+            type: String
         }, 
         email: { 
             type: String
