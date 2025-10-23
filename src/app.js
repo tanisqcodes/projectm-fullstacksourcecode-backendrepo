@@ -11,7 +11,7 @@ const app = express()
 // Enable CORS for all routes
 app.use(cors({ // currently app accepts requests from vite-react server
     origin: 'http://localhost:5173', // Vite default port
-    credentials: true
+    credentials: true 
 }))
 
 // parse JSON bodies
@@ -30,9 +30,9 @@ app.use("/api/user", router)
 
 // If a user deep-links (e.g., refreshes /app/dashboard),
 // this makes sure to send them the main index.html so React Router can take over.
-app.get('/app/*', (req, res) => {
+app.get(/\/app.*/ , (req, res) => {
     res.sendFile(path.join(__dirname, '..', '..', 'frontend', 'dist', 'index.html'));
-});
+}); 
 
 
 export {app}
