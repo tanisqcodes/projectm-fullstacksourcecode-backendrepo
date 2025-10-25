@@ -10,7 +10,7 @@ const app = express()
 
 // Enable CORS for all routes
 app.use(cors({ // currently app accepts requests from vite-react server
-    origin: 'http://localhost:5173', // Vite default port
+    origin: 'http://localhost:8000', // Vite default port
     credentials: true 
 }))
 

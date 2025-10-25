@@ -17,6 +17,7 @@ return res.status(200).json( new apiResponse(200 , {
     async(req, res) => { 
         console.log("method ran for /user/auth/google")
         const {code} = req.query; 
+       //  console.log(code)
        
         const googleRes = await oauth2client.getToken(code);
 
@@ -62,24 +63,32 @@ export const jwtVerifyMain = asyncHandler( async(req, res) => {
     console.log("method ran for /user/auth/landingPageJWTVerifier")
     const token = req.query.token
     if(!token){
-        return res.status(401).json( 
-            { 
+        return res.status(200).json(  
+            new apiResponse(401, { 
                 message: "jwt token is missing"
 
             }
+         ), "jwt token is missing"
+            
         )
     }
     try {
         const decodedToken = verify(token , process.env.JWT_SECRET)
-        if(!decodedToken) return res.status(403).json({ 
-            message: "invalid or expired Token"
-        })
+        if(!decodedToken){ return res.status(200).json(
+            new apiResponse(403, { 
+                message: "invalid or expired Token"
+            },  "invalid or expired Token" )
+            ) }
         return(
             res.status(200).json( 
-                { 
-                    message: "jwt token is verified", 
-                    decodedToken
-                }
+                new apiResponse( 
+                    200,  
+                    { 
+                        message: "jwt token is verified", 
+                        decodedToken
+                    }, "jwt token is valid and verified"
+                )
+                
             )
         )
     }catch (err) {
