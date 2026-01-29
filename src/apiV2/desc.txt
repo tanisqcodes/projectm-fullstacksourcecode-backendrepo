@@ -1,0 +1,6 @@
+this is the file for new api for leetcrack., i will continue hosting backend for both
+old.leetcrack.com and leetcrack.com . 
+from the same backend , the new backend will be extensive , doing the maximum work
+- i have to make intelligent choices , if you have to do extensive computation , 
+you can do it on "use client" 
+or use backend
