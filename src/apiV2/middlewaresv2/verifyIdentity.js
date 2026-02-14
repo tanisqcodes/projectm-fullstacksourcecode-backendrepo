@@ -3,7 +3,7 @@
 import {createClient} from "@supabase/supabase-js"
 import { apiResponse } from "../../utils/apiResponse.js"
 import { asyncHandler } from "../../utils/asyncHandler.js"
-function getSupabaseAccessToken(req) {
+function getSupabaseAccessToken(req){         
     const cookieKeys = Object.keys(req.cookies)
   
     const tokenParts = cookieKeys
@@ -32,7 +32,8 @@ const supabase = createClient(
 
 
 export const VerifyIdentity= asyncHandler(async(req, res, next) => { 
-   // console.log("method ran")
+  console.log("method verifyIdentity ran")
+
 
   const accessToken = getSupabaseAccessToken(req)
   if(!accessToken){ 
@@ -40,6 +41,7 @@ export const VerifyIdentity= asyncHandler(async(req, res, next) => {
   }
   const {data: { user} , error} = await supabase.auth.getUser(accessToken)
   if( !user || error){ 
+    console.log("error")
     return res.status(401).json(new apiResponse(401, { 
         "error":error
     }, 
@@ -48,6 +50,7 @@ export const VerifyIdentity= asyncHandler(async(req, res, next) => {
   if(user){ 
    // console.log(user)
     req.user = user;
+    req.userId= user.id
     next()
   }
 })

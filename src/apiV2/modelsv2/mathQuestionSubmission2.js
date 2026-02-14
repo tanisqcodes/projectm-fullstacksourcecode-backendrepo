@@ -2,67 +2,76 @@ import mongoose from "mongoose"
 
 const MathQuestionSubmissionSchema2 = new mongoose.Schema( { 
     questionId: { 
-        type: string, required:true
+        type: String, required: true
     },
     userId: { 
-        type: string, required:true
+        type: String, required: true
     },
     attemptId: { //Id.unique()
-        type: string, required:true
+        type: String, required: true
     },
     isHintViewed: { 
-        type: string, required:true
+        type: String, required: true
     },
     isAnswerViewed: { 
-        type: string, required:true
+        type: String, required: true
     },
     isCorrect: { 
-        type: string, required:true
+        type: String, required: true
     },
     retryCount: { 
-        type: string, required:true
+        type: String, required: true
     },
-    timeTakenInMin: { 
-        type: string, required:true
+    timeTakenInMinAnswer: { 
+        type: String, required: true
     },
-    timeTakenInSec: { 
-        type: string, required:true
+    timeTakenInSecAnswer: { 
+        type: String, required: true
+    },
+    timeTakenInSecondsAnswer: {   // only in seconds
+        type:String, required: true
     },
     timeTakenInSecHint: { 
-        type: string, required:true
+        type: String, required: true
     },
-    timeTakeninMinHint: { 
-        type: string, required:true
+    timeTakenInMinHint: { 
+        type: String, required: true
+    },
+    timeTakenInSecondsHint: {  // only in seconds
+        type: String, required: true
     },
     attemptMode: { 
-        type: string, required:true
+        type: String, required: true
     },
     // questionObjectDetails
     calculatorUse: { 
-        type: boolean, required:true
+        type: String, required: true
     },
     exam: { 
-        type: string, required:true
+        type: String, required: true
     },
     level: { 
-        type: string, required:true
+        type: String, required: true
     },
     questionNumber: { 
-        type: string, required:true
+        type: String, required: true
     },
     responseType: { 
-        type: string, required:true
+        type: String, required: true
     },
     section: { 
-        type: string, required:true
+        type: String, required: true
     },
-    chatperNumber: { 
-        type: string, required:true
+    chapterNumber: { 
+        type: String, required: true
     },
     topic: { 
-        type: string, required:true
+        type: String, required: true
     },
-
+   uniqueSubmissionId: { 
+        type:String, required: true
+    }, 
+   
 
 }, {timestamps: true})
-export const MathQuestionSubmissionModel2 = mongoose.model(math-question-submission-2, MathQuestionSubmissionSchema2)
+export const MathQuestionSubmissionModel2 = mongoose.model("MathQuestionSubmissionModelRemote2", MathQuestionSubmissionSchema2)
