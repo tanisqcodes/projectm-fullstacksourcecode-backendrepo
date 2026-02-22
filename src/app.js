@@ -11,6 +11,7 @@ app.use(cors({
     origin: [
         "http://localhost:3000",
         "https://leetcrack.com",
+        "https://api.leetcrack.com"
       ],
     credentials: true
 }))
