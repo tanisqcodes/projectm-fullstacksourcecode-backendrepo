@@ -1,1 +1,2 @@
 -we'll need to write more databases for questions solved on platform
+- commit : c21fcf5 is live on render and this is before adding new middleware verifyidentity2 and changing the middleware in api/v2 routes

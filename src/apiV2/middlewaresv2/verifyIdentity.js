@@ -54,3 +54,29 @@ export const VerifyIdentity= asyncHandler(async(req, res, next) => {
     next()
   }
 })
+
+
+export const VerifyIdentity2 = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const accessToken = authHeader.split(" ")[1]
+
+    const { data, error } = await supabase.auth.getUser(accessToken)
+
+    if (error || !data?.user) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    req.user = data.user
+    req.userId = data.user.id
+
+    next()
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" })
+  }
+}
