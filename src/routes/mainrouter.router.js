@@ -49,7 +49,7 @@ router.route("/api/v2/sat/maths/fetchLevels").get(questionInfoExtraction)
 router.route("/api/v2/sat/english/fetchQuestions").get(englishQuestionsFetch)
 
 // this is the route for sending englishQuestionObject to frontend
-router.route("/api/v2/sat/english/getEnglishQuestion").get(getEnglishQuestion)
+router.route("/api/v2/sat/english/getEnglishQuestion").get(VerifyIdentity, getEnglishQuestion)
 
 
 // this is the route for english question attempt submission
