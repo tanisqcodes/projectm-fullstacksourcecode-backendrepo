@@ -5,10 +5,10 @@ import { authtest } from "../controllers/auth.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 import { mathsQuestionSubmissionMethod } from "../controllers/main.controller.js"
 import { getSolvedMathsQuestionsMethod } from "../controllers/main.controller.js"
-import { getQuestion2, questionInfoExtraction } from "../apiV2/controllersv2/main.controller.js"
+import { englishQuestionsFetch, getQuestion2, questionInfoExtraction, getEnglishQuestion, submitEnglishQuestion, getSolvedQuestionsByQuestionTypeNumber } from "../apiV2/controllersv2/main.controller.js"
 import { VerifyIdentity } from "../apiV2/middlewaresv2/verifyIdentity.js"
 import { mathQuestionSubmissionMethod2 } from "../apiV2/controllersv2/main.controller.js"
-import { getMathAnalytics, getSolvedQuestions } from "../apiV2/controllersv2/analytics.controller.js"
+import { englishAnalyticsFetch, getMathAnalytics, getSolvedQuestions } from "../apiV2/controllersv2/analytics.controller.js"
 const router = Router()
 router.route("/practice/sat/maths").get(verifyJWT, getQuestion) 
 router.route("/auth/test").get(authtest)
@@ -44,6 +44,25 @@ router.route("/api/v2/sat/maths/analytics").get(VerifyIdentity, getMathAnalytics
 
 // route for fetching number of level-wise and total questions
 router.route("/api/v2/sat/maths/fetchLevels").get(questionInfoExtraction)
+
+//route for fetching infomation about english questions for filtering and other in site processes
+router.route("/api/v2/sat/english/fetchQuestions").get(englishQuestionsFetch)
+
+// this is the route for sending englishQuestionObject to frontend
+router.route("/api/v2/sat/english/getEnglishQuestion").get(getEnglishQuestion)
+
+
+// this is the route for english question attempt submission
+router.route("/api/v2/sat/english/submitEnglishQuestion").get(VerifyIdentity, submitEnglishQuestion)
+
+
+
+// this is the route to fetch englishSection Analytics
+router.route("/api/v2/sat/english/getEnglishAnalytics").get(VerifyIdentity, englishAnalyticsFetch)
+
+
+//this is the route to get questionSolvedByQuestionTypeNumber to render which quesitons are solved
+router.route("/api/v2/sat/english/getSolvedQuestionsByQuestionTypeNumber").get(VerifyIdentity, getSolvedQuestionsByQuestionTypeNumber )
 
 
 

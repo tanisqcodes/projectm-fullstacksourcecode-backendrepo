@@ -1,5 +1,6 @@
 import { apiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { englishQuestionSubmissionModel } from "../modelsv2/englishQuestionSubmission.js";
 import { MathQuestionSubmissionModel2 } from "../modelsv2/mathQuestionSubmission2.js";
 
 export const getSolvedQuestions = asyncHandler(async(req, res) => { 
@@ -518,3 +519,125 @@ solvedQuestionsStats: [
       return res.status(200).json(new apiResponse(200, response, "success: getMathAnalytics"))
     
 })
+
+
+// controller to submit english question submission is written in main.controller
+
+export const englishAnalyticsFetch = asyncHandler(async(req,res) => { 
+  const {userId} = req
+ // console.log()
+  const response = await englishQuestionSubmissionModel.aggregate([
+    /* --------------------------------
+       1️⃣ Filter to user
+    -------------------------------- */
+    {
+      $match: {
+        userId: userId
+      }
+    },
+  
+    /* --------------------------------
+       2️⃣ Collapse multiple submissions
+          per question
+          (count solved once only)
+    -------------------------------- */
+    {
+      $group: {
+        _id: "$questionId",
+        solved: { $max: "$isCorrect" },
+        level: { $first: "$level" },
+        questionTypeNumber: { $first: "$questionTypeNumber" }
+      }
+    },
+  
+    /* --------------------------------
+       3️⃣ Keep only solved questions
+    -------------------------------- */
+    {
+      $match: {
+        solved: true
+      }
+    },
+  
+    /* --------------------------------
+       4️⃣ Run analytics in parallel
+    -------------------------------- */
+    {
+      $facet: {
+  
+        /* -----------------------------
+           A. Total solved (overall)
+        ----------------------------- */
+        totalSolved: [
+          {
+            $count: "totalSolved"
+          }
+        ],
+  
+        /* -----------------------------
+           B. Solved by difficulty
+        ----------------------------- */
+        solvedByLevel: [
+          {
+            $group: {
+              _id: "$level",
+              solvedCount: { $sum: 1 }
+            }
+          },
+          {
+            $project: {
+              level: "$_id",
+              solvedCount: 1,
+              _id: 0
+            }
+          }
+        ],
+  
+        /* -----------------------------
+           C. Solved by QuestionTypeNumber
+              + level breakdown
+        ----------------------------- */
+        solvedByQuestionType: [
+          {
+            $group: {
+              _id: {
+                questionTypeNumber: "$questionTypeNumber",
+                level: "$level"
+              },
+              solvedCount: { $sum: 1 }
+            }
+          },
+          {
+            $group: {
+              _id: "$_id.questionTypeNumber",
+              totalSolved: { $sum: "$solvedCount" },
+              levelBreakdown: {
+                $push: {
+                  level: "$_id.level",
+                  solvedCount: "$solvedCount"
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              questionTypeNumber: "$_id",
+              totalSolved: 1,
+              levelBreakdown: 1,
+              _id: 0
+            }
+          },
+          { $sort: { questionTypeNumber: 1 } }
+        ]
+      }
+    }
+  ]);
+  if(!response){ 
+    return res.status(403).json(new apiResponse(403, {"403": "error in fetching english analytics from mongo remote db: englishQuestionSubmission"}, "an error occured while fetching englishAnalytics"))
+
+  }
+  return res.status(200).json(new apiResponse(200,{response} , "englishAnalytics successfully fetched"))
+})
+
+
+

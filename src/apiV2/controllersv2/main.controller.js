@@ -5,6 +5,10 @@ import { apiResponse } from "../../utils/apiResponse.js"
 import { MathsQuestionSubmissionModel } from "../../models/mathsQuestionSubmissions.js"
 import express from "express"
 import { MathQuestionSubmissionModel2 } from "../modelsv2/mathQuestionSubmission2.js"
+import fs from 'fs'
+import path from "path"
+import { englishQuestionSubmissionModel } from "../modelsv2/englishQuestionSubmission.js"
+
 
 const appwriteDatabaseId = process.env.APPWRITE_DATABASE_ID
 const satMathKaplanCollectionId = process.env.SAT_MATH_KAPLAN_COLLECTION_ID
@@ -159,7 +163,12 @@ export const mathQuestionSubmissionMethod2 =asyncHandler(
 
 
 
-// this is the test script to extract question information about level from appwrite database
+
+
+
+
+
+// this is the test script to extract question information about level from appwrite database, about how many , maths section
 export const questionInfoExtraction = asyncHandler( async(req, res) => { 
     const [
         total,
@@ -196,7 +205,7 @@ export const getEnglishQuestion = asyncHandler(async(req, res) => {
     databaseId: appwriteDatabaseId, 
     tableId : satEnglishCollectionId,
     queries: [
-        Query.equal('questionNumber', questionNumber) , 
+        Query.equal('questionNumberInThatModule', questionNumber) , 
         Query.equal('moduleNumber', moduleNumber)
 
     ] 
@@ -206,12 +215,147 @@ export const getEnglishQuestion = asyncHandler(async(req, res) => {
   throw new apiError(400, "question was not successfully fetched from appwrite database")
 
 }
+const questionImageLink =  `https://nyc.cloud.appwrite.io/v1/storage/buckets/${bucketId}/files/${questionObject.rows[0].questionMediaResponseId}/view?project=${projectId}&mode=admin`
+// console.log(questionImageLink)
+ questionObject.rows[0].questionImageLink = questionImageLink
+// console.log(questionObject.rows[0])
 
 
 // write a media link giver
 
-if(questionObject.rows[0]){ 
 
-}
- return res.status(200).json(new apiResponse(200, { questionObject} , "english question delivered successfully"))
+ return res.status(200).json(new apiResponse(200,{"questionObject":questionObject.rows[0], "questionMediaLink":questionImageLink}  , "english question delivered successfully"))
+})
+
+
+
+
+
+export const englishQuestionsFetch = asyncHandler( async(req, res) => { 
+  // this is the method to fetch specific attributes from the whole collection of englishQuestions
+/*
+ 
+  const LIMIT = 100;
+  let offset = 0;
+  let allQuestions= [];
+  while (true) {
+    const response = await tablesDB.listRows(
+      appwriteDatabaseId,
+      satEnglishCollectionId,
+      [
+        Query.select([
+          "questionTypeNumber",
+          "difficulty",
+          "moduleNumber",
+          "questionNumberInThatModule",
+        ]),
+        Query.limit(LIMIT),
+        Query.offset(offset),
+      ]
+    );
+  
+    allQuestions.push(...response.rows);
+  
+    if (response.rows.length < LIMIT) break;
+  
+    offset += LIMIT;
+  }
+  // file writing logoc
+  const outputPath = path.join(process.cwd(), "questions.js");
+
+const fileContent = `
+export const questions = ${JSON.stringify(allQuestions, null, 2)};
+`;
+
+fs.writeFileSync(outputPath, fileContent, "utf-8");
+
+console.log("✅ Questions file generated using TablesDB");
+
+return
+*/
+})
+
+
+
+
+
+
+// this is the controller to submit englishQuestion Attempts
+export const submitEnglishQuestion = asyncHandler(async(req, res) => { 
+  const { isCorrect, moduleNumber , questionNumber, level, questionTypeNumber, questionId } = req.query
+  const {userId} = req
+  const uniqueSubmissionId = ID.unique()
+  console.log(questionNumber)
+  const response  = await englishQuestionSubmissionModel.create({ 
+    questionId, 
+    userId, 
+    isCorrect, 
+    exam: "SAT",
+    level: level,
+    questionNumber, 
+    moduleNumber,
+    questionTypeNumber, 
+    uniqueSubmissionId
+
+
+  })
+  if(!response){ 
+    return res.status(500).json( (  new apiResponse(500, {"failed uploading question Submission to Database": "lol"}, "failed uploading question Submission to Database")))
+  }
+  return res.status(200).json(new apiResponse(200, {response}, "successfully uploaded questionSubmission to database"))
+
+
+})
+
+
+
+
+// this is the controller to find which Questions are solved by each QuestionTypeNumber, in english section
+export const getSolvedQuestionsByQuestionTypeNumber = asyncHandler(async(req, res) => { 
+  console.log("getSolvedQuestionsByQuestionTypeNumber ran")
+  const {userId} = req
+  const {questionTypeNumber} = req.query
+  const response = await englishQuestionSubmissionModel.aggregate([
+    /* 1️⃣ Filter by user + question type + correct */
+    {
+      $match: {
+        userId: userId,
+        questionTypeNumber: questionTypeNumber,
+        isCorrect: true
+      }
+    },
+  
+    /* 2️⃣ Make each question unique */
+    {
+      $group: {
+        _id: "$questionId",
+        questionId: { $first: "$questionId" },
+        level: { $first: "$level" },
+        questionNumber: { $first: "$questionNumber" },
+        moduleNumber: { $first: "$moduleNumber" },
+        questionTypeNumber: { $first: "$questionTypeNumber" },
+        solvedAt: { $min: "$createdAt" }
+      }
+    },
+  
+    /* 3️⃣ Clean output */
+    {
+      $project: {
+     
+        questionId: 1,
+        questionNumber: 1,
+        moduleNumber: 1,
+        questionTypeNumber: 1,
+        
+        
+      }
+    },
+  
+    { $sort: { solvedAt: 1 } }
+  ]);
+  // console.log(response)
+  if(!response){
+    return res.status(403).json(new apiResponse(403, {"failed while fetching for": "getSolvedQuestionsByQuestionTypeNumber"} ), "failed while getSolvedQuestionsByQuestionTypeNumber")
+  }
+  return res.status(200).json( new apiResponse(200, response, "successfully fetching information for getSolvedQuestionsByQuestionTypeNumber"))
 })
