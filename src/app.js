@@ -7,14 +7,25 @@ const app = express()
 app.use(helmet())
 
 // Enable CORS for all routes
-app.use(cors({ 
-    origin: [
-        "http://localhost:3000",
-        "https://leetcrack.com",
-        "https://api.leetcrack.com"
-      ],
-    credentials: true
-}))
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://leetcrack.com",
+  "https://www.leetcrack.com",
+]
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests (no origin) and any whitelisted origin
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error("Not allowed by CORS"))
+      }
+    },
+    credentials: true,
+  }),
+)
 
 // Parse JSON bodies
 app.use(express.json())
