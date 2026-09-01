@@ -31,6 +31,24 @@ app.use(
 app.use(express.json())
 app.use(cookieParser())
 
+// Global AOP Request Logger
+app.use((req, res, next) => {
+  const start = Date.now()
+  const timestamp = new Date().toLocaleTimeString()
+
+  res.on("finish", () => {
+    const duration = Date.now() - start
+    const status = res.statusCode
+    const icon = status >= 500 ? "💥" : status >= 400 ? "⚠️" : status >= 300 ? "🔄" : "✅"
+
+    console.log(
+      `[${timestamp}] ${icon} ${req.method.padEnd(6)} ${req.originalUrl} ➔ Status: ${status} (${duration}ms)`
+    )
+  })
+
+  next()
+})
+
 import {router} from "./routes/mainrouter.router.js"
 app.use("/user", router)
 app.use((req, res, next) => {
