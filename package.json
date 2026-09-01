@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/genai": "^2.20.0",
     "@supabase/supabase-js": "^2.93.3",
+    "@upstash/redis": "^1.38.3",
     "appwrite": "^20.1.0",
     "axios": "^1.12.2",
     "cookie-parser": "^1.4.7",

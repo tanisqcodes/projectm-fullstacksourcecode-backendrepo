@@ -8,6 +8,7 @@ import { MathQuestionSubmissionModel2 } from "../modelsv2/mathQuestionSubmission
 import fs from 'fs'
 import path from "path"
 import { englishQuestionSubmissionModel } from "../modelsv2/englishQuestionSubmission.js"
+import { getOrSetCache } from "../../utils/redis.js"
 
 
 const appwriteDatabaseId = process.env.APPWRITE_DATABASE_ID
@@ -58,50 +59,40 @@ you to find all these values in this method
 
 
 export const getQuestion2 = asyncHandler(async (req, res) => {
-  console.log("getquestion2 ran")
+  const { chapterNumber, questionNumber } = req.query;
+  const cacheKey = `sat:math:ch_${chapterNumber}:q_${questionNumber}`;
 
-  const { chapterNumber, questionNumber } = req.query
-  // console.log(appwriteDatabaseId)
-  const questionObject = await tablesDB.listRows({
-    databaseId: appwriteDatabaseId,
-    tableId: satMathKaplanCollectionId,
-    queries: [
-      Query.equal('questionNumber', questionNumber),
-      Query.equal('subtopic', `chapter ${chapterNumber}`)
+  const data = await getOrSetCache(cacheKey, 86400, async () => {
+    const questionObject = await tablesDB.listRows({
+      databaseId: appwriteDatabaseId,
+      tableId: satMathKaplanCollectionId,
+      queries: [
+        Query.equal('questionNumber', questionNumber),
+        Query.equal('subtopic', `chapter ${chapterNumber}`)
+      ]
+    });
 
-    ]
+    if (!questionObject || !questionObject.rows || questionObject.rows.length === 0) {
+      throw new apiError(400, "question was not successfully fetched from appwrite database");
+    }
 
-  });
+    const answerImageLink = storage.getFileView({
+      bucketId: bucketId,
+      fileId: questionObject.rows[0].answerImageResponseId
+    });
+    const questionImageLink = storage.getFileView({
+      bucketId: bucketId,
+      fileId: questionObject.rows[0].questionImageResponseId
+    });
 
-  // console.log(questionObject.rows[0])
-  if (!questionObject) {
-    throw new apiError(400, "question was not successfully fetched from appwrite database")
-  }
-
-  const answerImageLink = storage.getFileView({
-    bucketId: bucketId,
-    fileId: questionObject.rows[0].answerImageResponseId  // this is the answerImageResponseId
-  })
-  const questionImageLink = storage.getFileView({
-    bucketId: bucketId,
-    fileId: questionObject.rows[0].questionImageResponseId   // this is the answerImageResponseId
-  })
-
-
-  // console.log(questionObject)
-  return res.status(200).json(new apiResponse(200,
-    {
+    return {
       questionObject,
       questionImageLink,
       answerImageLink
-      //questionObject.questionImageResponseId,
+    };
+  });
 
-
-    }
-    , "question delivered by backend successfully"
-  ))
-
-
+  return res.status(200).json(new apiResponse(200, data, "question delivered by backend successfully"));
 })
 
 
@@ -200,30 +191,38 @@ export const questionInfoExtraction = asyncHandler(async (req, res) => {
 
 
 export const getEnglishQuestion = asyncHandler(async (req, res) => {
-  const { questionNumber, moduleNumber } = req.query
-  const questionObject = await tablesDB.listRows({
-    databaseId: appwriteDatabaseId,
-    tableId: satEnglishCollectionId,
-    queries: [
-      Query.equal('questionNumberInThatModule', questionNumber),
-      Query.equal('moduleNumber', moduleNumber)
+  const { questionNumber, moduleNumber } = req.query;
+  const cacheKey = `sat:english:m_${moduleNumber}:q_${questionNumber}`;
 
-    ]
+  const data = await getOrSetCache(cacheKey, 86400, async () => {
+    const questionObject = await tablesDB.listRows({
+      databaseId: appwriteDatabaseId,
+      tableId: satEnglishCollectionId,
+      queries: [
+        Query.equal('questionNumberInThatModule', questionNumber),
+        Query.equal('moduleNumber', moduleNumber)
+      ]
+    });
 
+    if (!questionObject || !questionObject.rows || questionObject.rows.length === 0) {
+      throw new apiError(400, "question was not successfully fetched from appwrite database");
+    }
+
+    const mediaId = questionObject.rows[0]?.questionMediaResponseId;
+    const questionImageLink = (mediaId && mediaId.trim() !== "")
+      ? `https://nyc.cloud.appwrite.io/v1/storage/buckets/${bucketId}/files/${mediaId}/view?project=${projectId}&mode=admin`
+      : null;
+    if (questionImageLink) {
+      questionObject.rows[0].questionImageLink = questionImageLink;
+    }
+
+    return {
+      questionObject: questionObject.rows[0],
+      questionMediaLink: questionImageLink
+    };
   });
-  if (!questionObject || !questionObject.rows || questionObject.rows.length === 0) {
-    throw new apiError(400, "question was not successfully fetched from appwrite database");
-  }
 
-  const mediaId = questionObject.rows[0]?.questionMediaResponseId;
-  const questionImageLink = (mediaId && mediaId.trim() !== "")
-    ? `https://nyc.cloud.appwrite.io/v1/storage/buckets/${bucketId}/files/${mediaId}/view?project=${projectId}&mode=admin`
-    : null;
-  if (questionImageLink) {
-    questionObject.rows[0].questionImageLink = questionImageLink;
-  }
-
-  return res.status(200).json(new apiResponse(200, { "questionObject": questionObject.rows[0], "questionMediaLink": questionImageLink }, "english question delivered successfully"));
+  return res.status(200).json(new apiResponse(200, data, "english question delivered successfully"));
 })
 
 
