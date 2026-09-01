@@ -9,6 +9,7 @@ import { englishQuestionsFetch, getQuestion2, questionInfoExtraction, getEnglish
 import { VerifyIdentity, VerifyIdentity2 } from "../apiV2/middlewaresv2/verifyIdentity.js"
 import { mathQuestionSubmissionMethod2 } from "../apiV2/controllersv2/main.controller.js"
 import { englishAnalyticsFetch, getMathAnalytics, getSolvedQuestions } from "../apiV2/controllersv2/analytics.controller.js"
+import { aiChatController } from "../apiV2/AiControllers/ai.controller.js"
 const router = Router()
 router.route("/practice/sat/maths").get(verifyJWT, getQuestion) 
 router.route("/auth/test").get(authtest)
@@ -66,6 +67,9 @@ router.route("/api/v2/sat/english/getSolvedQuestionsByQuestionTypeNumber").get(V
 
 
 
+
+// AI Tutor Route (Multimodal Gemini SAT Tutor)
+router.route("/api/v2/sat/ai/chat").post(VerifyIdentity2, aiChatController)
 
 // router.route("/api/v2/sat/maths/ ")
 

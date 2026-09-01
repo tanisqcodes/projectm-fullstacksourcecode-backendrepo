@@ -11,6 +11,7 @@
   "author": "tanishq nagar",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^2.20.0",
     "@supabase/supabase-js": "^2.93.3",
     "appwrite": "^20.1.0",
     "axios": "^1.12.2",
